@@ -1,10 +1,19 @@
 plugins {
     id 'java-library'
     alias(libs.plugins.kotlin.jvm)
+    id 'maven-publish'
+    id 'signing'
 }
+
+group = ARTIFACT_GROUP
+version = ARTIFACT_VERSION
+
 java {
     sourceCompatibility JavaVersion.VERSION_11
     targetCompatibility JavaVersion.VERSION_11
+
+    withSourcesJar()
+    withJavadocJar()
 }
 kotlin {
     compilerOptions {
@@ -15,4 +24,63 @@ kotlin {
 dependencies {
     implementation(libs.annotation.jvm)
     implementation(libs.coroutines)
+}
+
+publishing {
+    publications {
+        create("mavenJava", MavenPublication) {
+            from components.java
+
+            pom {
+                name.set(POM_NAME)
+                description.set(POM_DESCRIPTION)
+                url.set(POM_URL)
+
+                licenses {
+                    license {
+                        name.set(POM_LICENSE_NAME)
+                        url.set(POM_LICENSE_URL)
+                        distribution.set(POM_LICENSE_DIST)
+                    }
+                }
+
+                scm {
+                    url.set(POM_SCM_URL)
+                    connection.set(POM_SCM_CONNECTION)
+                    developerConnection.set(POM_SCM_DEV_CONNECTION)
+                }
+
+                developers {
+                    developer {
+                        id.set(POM_DEVELOPER_ID)
+                        name.set(POM_DEVELOPER_NAME)
+                        email.set(POM_DEVELOPER_EMAIL)
+                    }
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "sonatype"
+            url = uri(
+                    System.getenv("REPO_RELEASE_URL") ?: REPO_RELEASE_URL
+            )
+            credentials {
+                username = System.getenv("REPO_USERNAME") ?: REPO_USERNAME
+                password = System.getenv("REPO_PASSWORD") ?: REPO_PASSWORD
+            }
+        }
+    }
+}
+
+signing {
+    useInMemoryPgpKeys(
+            System.getenv("SIGNING_KEY_ID"),
+            System.getenv("SIGNING_KEY"),
+            System.getenv("SIGNING_PASSWORD")
+    )
+
+    sign publishing.publications
 }

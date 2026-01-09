@@ -1,7 +1,12 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    id 'maven-publish'
+    id 'signing'
 }
+
+group = ARTIFACT_GROUP
+version = ARTIFACT_VERSION
 
 android {
     namespace 'com.yugyd.jvmmvvm.ui'
@@ -29,6 +34,13 @@ android {
     kotlinOptions {
         jvmTarget = '11'
     }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 }
 
 dependencies {
@@ -41,4 +53,65 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
     androidTestImplementation libs.androidx.espresso.core
+}
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            pom {
+                name.set(POM_NAME)
+                description.set(POM_DESCRIPTION)
+                url.set(POM_URL)
+
+                licenses {
+                    license {
+                        name.set(POM_LICENSE_NAME)
+                        url.set(POM_LICENSE_URL)
+                        distribution.set(POM_LICENSE_DIST)
+                    }
+                }
+
+                scm {
+                    url.set(POM_SCM_URL)
+                    connection.set(POM_SCM_CONNECTION)
+                    developerConnection.set(POM_SCM_DEV_CONNECTION)
+                }
+
+                developers {
+                    developer {
+                        id.set(POM_DEVELOPER_ID)
+                        name.set(POM_DEVELOPER_NAME)
+                        email.set(POM_DEVELOPER_EMAIL)
+                    }
+                }
+            }
+
+            afterEvaluate {
+                from components.release
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "sonatype"
+            url = uri(
+                    System.getenv("REPO_RELEASE_URL") ?: REPO_RELEASE_URL
+            )
+            credentials {
+                username = System.getenv("REPO_USERNAME") ?: REPO_USERNAME
+                password = System.getenv("REPO_PASSWORD") ?: REPO_PASSWORD
+            }
+        }
+    }
+}
+
+signing {
+    useInMemoryPgpKeys(
+            System.getenv("SIGNING_KEY_ID"),
+            System.getenv("SIGNING_KEY"),
+            System.getenv("SIGNING_PASSWORD")
+    )
+
+    sign publishing.publications
 }
