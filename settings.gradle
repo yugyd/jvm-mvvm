@@ -28,6 +28,7 @@ buildCache {
 rootProject.name = "ViewModelDelegates"
 // Sample app
 include ':sample'
+include(":composeApp")
 // Lib
 include(':viewmodeldelegates-bom')
 include ':viewmodeldelegates-ui'
