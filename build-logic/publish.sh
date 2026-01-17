@@ -11,6 +11,5 @@
 # If key was created with a password.
 # ORG_GRADLE_PROJECT_signingInMemoryKeyPassword=some_password
 
-./gradlew :viewmodeldelegates:publishToMavenLocal --console=plain
-./gradlew :viewmodeldelegates-ui:publishToMavenLocal --console=plain
-./gradlew :viewmodeldelegates-bom:publishToMavenLocal --console=plain
+./gradlew clean --console=plain
+./gradlew publishToMavenCentral --console=plain
